@@ -16,6 +16,34 @@ namespace chip_8
 
         }
 
+        //00E0 - CLS
+        //Clear the display.
+        [Test]
+        public void TestCLS()
+        {
+            Assert.Fail();
+        }
+
+        //00EE - RET
+        //Return from a subroutine.
+        //
+        //The interpreter sets the program counter to the address at the top of the stack,
+        //then subtracts 1 from the stack pointer.
+        [Test]
+        public void TestRET()
+        {
+            State state = new State();
+            Core test = new Core(state);
+            state.stack[state.SP] = 0x08FF;
+            state.SP += 1;
+            var oldSP = state.SP;
+            test.Load(new byte[] { 0x00, 0xEE });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(0x8FF, state.PC);
+            Assert.AreEqual(oldSP - 1, state.SP);
+        }
+
         // Jump to address nnn
         [Test]
         public void Test1nnn()
@@ -35,10 +63,11 @@ namespace chip_8
             State state = new State();
             Core test = new Core(state);
             test.Load(new byte[] { 0x21, 0x23 });
+            var oldSP = state.SP;
             test.ExecuteCycle();
 
             Assert.AreEqual(state.PC, 0x0123);
-            Assert.AreEqual(state.SP, 0x100 - 2);
+            Assert.AreEqual(1, state.SP);
         }
 
         //3xkk - SE Vx, byte
@@ -75,11 +104,19 @@ namespace chip_8
         {
             State state = new State();
             Core test = new Core(state);
-            test.Load(new byte[] { 0x21, 0x23 });
+            state.V[1] = 0;
+            test.Load(new byte[] { 0x41, 0x23 });
+            var oldPC = state.PC;
             test.ExecuteCycle();
 
-            Assert.AreEqual(state.PC, 0x0123);
-            Assert.AreEqual(state.SP, 0x100 - 2);
+            Assert.AreEqual(oldPC + 4, state.PC);
+
+            state.Reset();
+            state.V[1] = 0x23;
+            var oldPC2 = state.PC;
+            test.ExecuteCycle();
+
+            Assert.AreEqual(oldPC2 + 2, state.PC);
         }
 
         //5xy0 - SE Vx, Vy

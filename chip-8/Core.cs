@@ -15,12 +15,14 @@ namespace chip_8
         {
             _s = state;
             _rng = new Random();
+            LoadFonts();
         }
 
         public Core(State state, Random rng)
         {
             _s = state;
             _rng = rng;
+            LoadFonts();
         }
 
         public void ExecuteCycle()
@@ -31,6 +33,16 @@ namespace chip_8
 
             switch(instruction.opcode)
             {
+                case 0x0:
+                    if(instruction.kk == 0xE0) //CLS
+                    {
+
+                    }
+                    else if(instruction.kk == 0xEE) //RET
+                    {
+                        _s.PC = popStack();
+                    }
+                    break;
                 case 0x1:
                     _s.PC = instruction.nnn;
                     break;
@@ -40,26 +52,22 @@ namespace chip_8
                     break;
                 case 0x3:
                     {
-                        byte xIndex = instruction.x;
-                        var x = _s.V[xIndex];
+                        var x = _s.V[instruction.x];
                         var param = instruction.kk;
                         if (x == param) _s.PC += 2;
                     }
                     break;
                 case 0x4:
                     {
-                        byte xIndex = instruction.x;
-                        var x = _s.V[xIndex];
+                        var x = _s.V[instruction.x];
                         var param = instruction.kk;
                         if (x != param) _s.PC += 2;
                     }
                     break;
                 case 0x5:
                     {
-                        byte xIndex = instruction.x;
-                        byte yIndex = instruction.y;
-                        var x = _s.V[xIndex];
-                        var y = _s.V[yIndex];
+                        var x = _s.V[instruction.x];
+                        var y = _s.V[instruction.y];
                         if (x == y) _s.PC += 2;
                     }
                     break;
@@ -205,13 +213,24 @@ namespace chip_8
 
         private void pushStack(ushort item)
         {
-            _s.memory[_s.SP--] = (byte)(item >> 8);
-            _s.memory[_s.SP--] = (byte)(item & 0x00FF);
+            _s.stack[_s.SP++] = item;
         }
 
-        private void popStack()
+        private ushort popStack()
         {
+            return _s.stack[_s.SP--];
+        }
 
+        private void LoadFonts()
+        {
+            ushort startload = 0;
+            for(var i = 0; i <= 0xF; i++)
+            {
+                for(var j = 0; j < 5; j++)
+                {
+                    _s.memory[startload++] = Font.fonts[i, j];
+                }
+            }
         }
     }
 }

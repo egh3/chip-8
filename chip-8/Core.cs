@@ -218,7 +218,7 @@ namespace chip_8
 
         private ushort popStack()
         {
-            return _s.stack[_s.SP--];
+            return _s.stack[--_s.SP];
         }
 
         private void LoadFonts()

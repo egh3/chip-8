@@ -335,15 +335,19 @@ namespace chip_8
         {
             State state = new State();
             Core test = new Core(state);
-            state.V[3] = 0x01;
-            state.V[6] = 0x02;
+            state.V[3] = 0x05;
             test.Load(new byte[] { 0x83, 0x66 });
             test.ExecuteCycle();
 
-            Assert.AreEqual(state.V[0x3], 0xFF);
-            Assert.AreEqual(state.V[0xF], 0);
+            Assert.AreEqual(state.V[0x3], 0x2);
+            Assert.AreEqual(state.V[0xF], 1);
 
             state.Reset();
+            state.V[3] = 0x08;
+            test.ExecuteCycle();
+
+            Assert.AreEqual(state.V[0x3], 0x4);
+            Assert.AreEqual(state.V[0xF], 0);
         }
 
         //8xy7 - SUBN Vx, Vy
@@ -360,10 +364,223 @@ namespace chip_8
             test.Load(new byte[] { 0x83, 0x67 });
             test.ExecuteCycle();
 
-            Assert.AreEqual(state.V[0x3], 0xFF);
-            Assert.AreEqual(state.V[0xF], 0);
+            Assert.AreEqual(state.V[0x3], 0x01);
+            Assert.AreEqual(state.V[0xF], 1);
 
             state.Reset();
         }
-    }
+
+        //8xyE - SHL Vx {, Vy }
+        //Set Vx = Vx SHL 1.
+        //
+        //If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
+        [Test]
+        public void Test8xyE()
+        {
+            State state = new State();
+            Core test = new Core(state);
+            state.V[0xF] = 0;
+            state.V[3] = 0x85;
+
+            test.Load(new byte[] { 0x83, 0x6E });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(state.V[3], 10);
+            Assert.AreEqual(state.V[0xF], 1);
+        }
+
+        //9xy0 - SNE Vx, Vy
+        //Skip next instruction if Vx != Vy.
+        //
+        //The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
+        [Test]
+        public void Test9xy0()
+        {
+            State state = new State();
+            Core test = new Core(state);
+            state.V[0x3] = 10;
+            state.V[0x6] = 10;
+
+            test.Load(new byte[] { 0x93, 0x60 });
+            var oldPC = state.PC;
+            test.ExecuteCycle();
+
+            Assert.AreEqual(oldPC + 2, state.PC);
+
+            state.Reset();
+
+            state.V[0x3] = 10;
+            state.V[0x6] = 20;
+            var oldPC2 = state.PC;
+            test.ExecuteCycle();
+
+            Assert.AreEqual(oldPC2 + 4, state.PC);
+        }
+
+        //Annn - LD I, addr
+        //Set I = nnn.
+        //
+        //The value of register I is set to nnn.
+        [Test]
+        public void TestAnnn()
+        {
+            State state = new State();
+            Core test = new Core(state);
+            test.Load(new byte[] { 0xA3, 0x45 });
+            state.I = 100;
+            test.ExecuteCycle();
+
+            Assert.AreEqual(state.I, 0x345);
+        }
+
+        //Bnnn - JP V0, addr
+        //Jump to location nnn + V0.
+        //
+        //The program counter is set to nnn plus the value of V0.
+        [Test]
+        public void TestBnnn()
+        {
+            State state = new State();
+            Core test = new Core(state);
+            state.V[0] = 8;
+            test.Load(new byte[] { 0xB1, 0x04 });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(0x104 + 8, state.PC);
+        }
+
+        //Cxkk - RND Vx, byte
+        //Set Vx = random byte AND kk.
+        //
+        //The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk.
+        //The results are stored in Vx. See instruction 8xy2 for more information on AND.
+        [Test]
+        public void TestCxkk()
+        {
+            Assert.Fail();
+        }
+
+        //Dxyn - DRW Vx, Vy, nibble
+        //Display n-byte sprite starting at memory location I at(Vx, Vy), set VF = collision.
+        //
+        //The interpreter reads n bytes from memory, starting at the address stored in I.
+        //These bytes are then displayed as sprites on screen at coordinates(Vx, Vy).
+        //Sprites are XORed onto the existing screen.If this causes any pixels to be erased, VF is set to 1, 
+        //otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of
+        //the display, it wraps around to the opposite side of the screen.
+        //See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information
+        //on the Chip-8 screen and sprites.
+        [Test]
+        public void TestDxyn()
+        {
+            Assert.Fail();
+        }
+
+        //Ex9E - SKP Vx
+        //Skip next instruction if key with the value of Vx is pressed.
+        //
+        //Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
+        [Test]
+        public void TestEx9E()
+        {
+            Assert.Fail();
+        }
+
+        //ExA1 - SKNP Vx
+        //Skip next instruction if key with the value of Vx is not pressed.
+        //
+        //Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
+        [Test]
+        public void TestExA1()
+        {
+            Assert.Fail();
+        }
+
+        //Fx07 - LD Vx, DT
+        //Set Vx = delay timer value.
+        //
+        //The value of DT is placed into Vx.
+        [Test]
+        public void TestFx07()
+        {
+            Assert.Fail();
+        }
+        //Fx0A - LD Vx, K
+        //Wait for a key press, store the value of the key in Vx.
+        //
+        //All execution stops until a key is pressed, then the value of that key is stored in Vx.
+        [Test]
+        public void TestFx0A()
+        {
+            Assert.Fail();
+        }
+        //Fx15 - LD DT, Vx
+        //Set delay timer = Vx.
+        //
+        //DT is set equal to the value of Vx.
+        [Test]
+        public void TestFx15()
+        {
+            Assert.Fail();
+        }
+        //Fx18 - LD ST, Vx
+        //Set sound timer = Vx.
+        //
+        //ST is set equal to the value of Vx.
+        [Test]
+        public void TestFx18()
+        {
+            Assert.Fail();
+        }
+
+        //Fx1E - ADD I, Vx
+        //Set I = I + Vx.
+        //
+        //The values of I and Vx are added, and the results are stored in I.
+        [Test]
+        public void TestFx1E()
+        {
+            Assert.Fail();
+        }
+
+        //Fx29 - LD F, Vx
+        //Set I = location of sprite for digit Vx.
+        //
+        //The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.See section 2.4, Display, for more information on the Chip-8 hexadecimal font.
+        [Test]
+        public void TestFx29()
+        {
+            Assert.Fail();
+        }
+
+        //Fx33 - LD B, Vx
+        //Store BCD representation of Vx in memory locations I, I+1, and I+2.
+        //
+        //The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
+        [Test]
+        public void TestFx33()
+        {
+            Assert.Fail();
+        }
+
+        //Fx55 - LD[I], Vx
+        //Store registers V0 through Vx in memory starting at location I.
+        //
+        //The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
+        [Test]
+        public void TestFx55()
+        {
+            Assert.Fail();
+        }
+
+        //Fx65 - LD Vx, [I]
+        //Read registers V0 through Vx from memory starting at location I.
+        //
+        //The interpreter reads values from memory starting at location I into registers V0 through Vx.
+        [Test]
+        public void TestFx65()
+        {
+            Assert.Fail();
+        }
+     }
 }

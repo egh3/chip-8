@@ -74,9 +74,7 @@ namespace chip_8
                         {
                             case 0x0:
                                 {
-                                    byte xIndex = instruction.x;
-                                    byte yIndex = instruction.y;
-                                    _s.V[xIndex] = _s.V[yIndex];
+                                    _s.V[instruction.x] = _s.V[instruction.y];
                                 }
                                 break;
                             case 0x1:
@@ -131,12 +129,22 @@ namespace chip_8
                                     _s.V[0xF] = 0;
                                     byte xIndex = instruction.x;
                                     byte yIndex = instruction.y;
-                                    if (_s.V[xIndex] > _s.V[yIndex]) _s.V[0xF] = 1;
+                                    if (_s.V[yIndex] > _s.V[xIndex]) _s.V[0xF] = 1;
                                     _s.V[xIndex] = (byte)(_s.V[yIndex] - _s.V[xIndex]);
                                 }
                                 break;
                             case 0xE:
+                                _s.V[0xF] = (byte)((_s.V[instruction.x] & 0x80) != 0 ? 1 : 0);
+                                _s.V[instruction.x] *= 2;
                                 break;
+                        }
+                    }
+                    break;
+                case 0x9:
+                    {
+                        if(_s.V[instruction.x] != _s.V[instruction.y])
+                        {
+                            _s.PC += 2;
                         }
                     }
                     break;

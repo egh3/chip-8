@@ -457,7 +457,13 @@ namespace chip_8
         [Test]
         public void TestCxkk()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state, new Random(1));
+
+            test.Load(new byte[] { 0xC1, 0xAA });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(0xAA & 70, state.V[1]);
         }
 
         //Dxyn - DRW Vx, Vy, nibble
@@ -479,7 +485,8 @@ namespace chip_8
         //Ex9E - SKP Vx
         //Skip next instruction if key with the value of Vx is pressed.
         //
-        //Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
+        //Checks the keyboard, and if the key corresponding to the value of Vx is currently in the
+        //down position, PC is increased by 2.
         [Test]
         public void TestEx9E()
         {
@@ -489,7 +496,8 @@ namespace chip_8
         //ExA1 - SKNP Vx
         //Skip next instruction if key with the value of Vx is not pressed.
         //
-        //Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
+        //Checks the keyboard, and if the key corresponding to the value of Vx is currently in the
+        //up position, PC is increased by 2.
         [Test]
         public void TestExA1()
         {
@@ -503,8 +511,17 @@ namespace chip_8
         [Test]
         public void TestFx07()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.V[7] = 0;
+            state.DT = 70;
+
+            test.Load(new byte[] { 0xF7, 0x07 });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(70, state.V[7]);
         }
+
         //Fx0A - LD Vx, K
         //Wait for a key press, store the value of the key in Vx.
         //
@@ -514,6 +531,7 @@ namespace chip_8
         {
             Assert.Fail();
         }
+
         //Fx15 - LD DT, Vx
         //Set delay timer = Vx.
         //
@@ -521,8 +539,17 @@ namespace chip_8
         [Test]
         public void TestFx15()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.V[7] = 40;
+            state.DT = 0;
+
+            test.Load(new byte[] { 0xF7, 0x15 });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(40, state.DT);
         }
+
         //Fx18 - LD ST, Vx
         //Set sound timer = Vx.
         //
@@ -530,7 +557,15 @@ namespace chip_8
         [Test]
         public void TestFx18()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.V[7] = 40;
+            state.DT = 0;
+
+            test.Load(new byte[] { 0xF7, 0x18 });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(40, state.ST);
         }
 
         //Fx1E - ADD I, Vx
@@ -540,13 +575,23 @@ namespace chip_8
         [Test]
         public void TestFx1E()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.I = 2;
+            state.V[8] = 2;
+
+            test.Load(new byte[] { 0xF8, 0x1E });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(4, state.I);
         }
 
         //Fx29 - LD F, Vx
         //Set I = location of sprite for digit Vx.
         //
-        //The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.See section 2.4, Display, for more information on the Chip-8 hexadecimal font.
+        //The value of I is set to the location for the hexadecimal sprite 
+        //corresponding to the value of Vx.See section 2.4, Display, for more information
+        //on the Chip-8 hexadecimal font.
         [Test]
         public void TestFx29()
         {
@@ -556,21 +601,74 @@ namespace chip_8
         //Fx33 - LD B, Vx
         //Store BCD representation of Vx in memory locations I, I+1, and I+2.
         //
-        //The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
+        //The interpreter takes the decimal value of Vx, and places the hundreds digit in memory
+        //at location in I, the tens digit at location I+1, and the ones digit at location I+2.
         [Test]
         public void TestFx33()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.I = 0x250;
+            state.V[8] = 255;
+
+            test.Load(new byte[] { 0xF8, 0x33 });
+            test.ExecuteCycle();
+
+            var bcd = new byte[] { state.memory[state.I], state.memory[state.I + 1], state.memory[state.I + 2] };
+
+            Assert.AreEqual(new byte[] { 2, 5, 5 }, bcd);
+
+            state.Reset();
+            state.V[8] = 128;
+            test.ExecuteCycle();
+
+            var bcd2 = new byte[] { state.memory[state.I], state.memory[state.I + 1], state.memory[state.I + 2] };
+
+            Assert.AreEqual(new byte[] { 1, 2, 8 }, bcd2);
+
+            state.Reset();
+            state.V[8] = 18;
+            test.ExecuteCycle();
+
+            var bcd3 = new byte[] { state.memory[state.I], state.memory[state.I + 1], state.memory[state.I + 2] };
+
+            Assert.AreEqual(new byte[] {0, 1, 8 }, bcd3);
+
+            state.Reset();
+            state.V[8] = 5;
+            test.ExecuteCycle();
+
+            var bcd4 = new byte[] { state.memory[state.I], state.memory[state.I + 1], state.memory[state.I + 2] };
+
+            Assert.AreEqual(new byte[] { 0, 0, 5 }, bcd4);
         }
 
         //Fx55 - LD[I], Vx
         //Store registers V0 through Vx in memory starting at location I.
         //
-        //The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
+        //The interpreter copies the values of registers V0 through Vx into memory,
+        //starting at the address in I.
+        //TODO: Copy beyond 4096 bountry?
         [Test]
         public void TestFx55()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.V[0] = 5;
+            state.V[1] = 4;
+            state.V[2] = 3;
+            state.V[3] = 2;
+            state.V[4] = 1;
+            state.V[5] = 5;
+            state.I = 0x250;
+
+            test.Load(new byte[] { 0xF5, 0x55 });
+            test.ExecuteCycle();
+
+            var user_memory = new byte[5];
+            Array.Copy(state.memory, state.I, user_memory, 0, 5);
+
+            Assert.AreEqual(new byte[] { 5, 4, 3, 2, 1 }, user_memory);
         }
 
         //Fx65 - LD Vx, [I]
@@ -580,7 +678,19 @@ namespace chip_8
         [Test]
         public void TestFx65()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.I = 0x250;
+            state.V[5] = 5;
+            Array.Copy(new byte[] { 1, 2, 3, 4, 5 }, 0, state.memory, state.I, 5);
+
+            test.Load(new byte[] { 0xF5, 0x65 });
+            test.ExecuteCycle();
+
+            var temp = new byte[5];
+            Array.Copy(state.V, 0, temp, 0, 5);
+
+            Assert.AreEqual(new byte[] { 1, 2, 3, 4, 5 }, temp);
         }
      }
 }

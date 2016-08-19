@@ -13,6 +13,8 @@ namespace chip_8
         public ushort I;
         public ushort PC = 0x200;
         public ushort SP;
+        public byte DT;
+        public byte ST;
 
         public byte[] memory = new byte[0x1000];
 

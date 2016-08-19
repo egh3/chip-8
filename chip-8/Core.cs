@@ -9,9 +9,18 @@ namespace chip_8
     class Core
     {
         private State _s;
+        private readonly Random _rng;
+
         public Core(State state)
         {
             _s = state;
+            _rng = new Random();
+        }
+
+        public Core(State state, Random rng)
+        {
+            _s = state;
+            _rng = rng;
         }
 
         public void ExecuteCycle()
@@ -79,45 +88,35 @@ namespace chip_8
                                 break;
                             case 0x1:
                                 {
-                                    byte xIndex = instruction.x;
-                                    byte yIndex = instruction.y;
-                                    _s.V[xIndex] = (byte)(_s.V[xIndex] | _s.V[yIndex]);
+                                    _s.V[instruction.x] = (byte)(_s.V[instruction.x] | _s.V[instruction.y]);
                                 }
                                 break;
                             case 0x2:
                                 {
-                                    byte xIndex = instruction.x;
-                                    byte yIndex = instruction.y;
-                                    _s.V[xIndex] = (byte)(_s.V[xIndex] & _s.V[yIndex]);
+                                    _s.V[instruction.x] = (byte)(_s.V[instruction.x] & _s.V[instruction.y]);
                                 }
                                 break;
                             case 0x3:
                                 {
-                                    byte xIndex = instruction.x;
-                                    byte yIndex = instruction.y;
-                                    _s.V[xIndex] = (byte)(_s.V[xIndex] ^ _s.V[yIndex]);
+                                    _s.V[instruction.x] = (byte)(_s.V[instruction.x] ^ _s.V[instruction.y]);
                                 }
                                 break;
                             case 0x4:
                                 {
                                     _s.V[0xF] = 0;
-                                    byte xIndex = instruction.x;
-                                    byte yIndex = instruction.y;
-                                    int temp = _s.V[xIndex] + _s.V[yIndex];
+                                    int temp = _s.V[instruction.x] + _s.V[instruction.y];
                                     if(temp > 255)
                                     {
                                         _s.V[0xF] = 1;
                                     }
-                                    _s.V[xIndex] = (byte)temp;
+                                    _s.V[instruction.x] = (byte)temp;
                                 }
                                 break;
                             case 0x5: //BUG?
                                 {
                                     _s.V[0xF] = 0;
-                                    byte xIndex = instruction.x;
-                                    byte yIndex = instruction.y;
-                                    if(_s.V[xIndex] > _s.V[yIndex]) _s.V[0xF] = 1;
-                                    _s.V[xIndex] = (byte)(_s.V[xIndex] - _s.V[yIndex]);
+                                    if(_s.V[instruction.x] > _s.V[instruction.y]) _s.V[0xF] = 1;
+                                    _s.V[instruction.x] = (byte)(_s.V[instruction.x] - _s.V[instruction.y]);
                                 }
                                 break;
                             case 0x6:
@@ -127,10 +126,8 @@ namespace chip_8
                             case 0x7:
                                 {
                                     _s.V[0xF] = 0;
-                                    byte xIndex = instruction.x;
-                                    byte yIndex = instruction.y;
-                                    if (_s.V[yIndex] > _s.V[xIndex]) _s.V[0xF] = 1;
-                                    _s.V[xIndex] = (byte)(_s.V[yIndex] - _s.V[xIndex]);
+                                    if (_s.V[instruction.y] > _s.V[instruction.x]) _s.V[0xF] = 1;
+                                    _s.V[instruction.x] = (byte)(_s.V[instruction.y] - _s.V[instruction.x]);
                                 }
                                 break;
                             case 0xE:
@@ -156,9 +153,45 @@ namespace chip_8
                     break;
                 case 0xC:
                     var ba = new byte[1];
-                    Random a = new Random();
-                    a.NextBytes(ba);
+                    _rng.NextBytes(ba);
                     _s.V[instruction.x] = (byte)(ba[0] & instruction.kk);
+                    break;
+                case 0xD:
+                    break;
+                case 0xE:
+                    break;
+                case 0xF:
+                    {
+                        switch(instruction.kk)
+                        {
+                            case 0x07:
+                                _s.V[instruction.x] = _s.DT;
+                                break;
+                            case 0x15:
+                                _s.DT = _s.V[instruction.x];
+                                break;
+                            case 0x18:
+                                _s.ST = _s.V[instruction.x];
+                                break;
+                            case 0x1E:
+                                _s.I += _s.V[instruction.x];
+                                break;
+                            case 0x33:
+                                var temp = _s.V[instruction.x];
+                                _s.memory[_s.I] = (byte)(temp/100);
+                                temp %= 100;
+                                _s.memory[_s.I+1] = (byte)(temp/10);
+                                temp %= 10;
+                                _s.memory[_s.I+2] = temp;
+                                break;
+                            case 0x55:
+                                Array.Copy(_s.V, 0, _s.memory, _s.I, _s.V[instruction.x]);
+                                break;
+                            case 0x65:
+                                Array.Copy(_s.memory, _s.I, _s.V, 0, _s.V[instruction.x]);
+                                break;
+                        }
+                    }
                     break;
                 default:
                     throw new Exception("Invalid Opcode");

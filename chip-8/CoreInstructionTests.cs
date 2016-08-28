@@ -508,7 +508,7 @@ namespace chip_8
         //
         //The interpreter reads n bytes from memory, starting at the address stored in I.
         //These bytes are then displayed as sprites on screen at coordinates(Vx, Vy).
-        //Sprites are XORed onto the existing screen.If this causes any pixels to be erased, VF is set to 1, 
+        //Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, 
         //otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of
         //the display, it wraps around to the opposite side of the screen.
         //See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information
@@ -516,6 +516,16 @@ namespace chip_8
         [Test]
         public void TestDxyn()
         {
+            State state = new State();
+            Core test = new Core(state);
+            state.V[4] = 64-2;
+            state.V[5] = 0; 
+
+            test.Load(new byte[] { 0xD4, 0x05 });
+            test.ExecuteCycle();
+            test.Load(new byte[] { 0xD4, 0x05 });
+            state.Reset();
+            test.ExecuteCycle();
             Assert.Fail();
         }
 
@@ -527,7 +537,22 @@ namespace chip_8
         [Test]
         public void TestEx9E()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.V[0] = 4;
+            var oldPC = state.PC;
+
+            test.Load(new byte[] { 0xE0, 0x9E });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(oldPC + 4, state.PC);
+
+            state.Reset();
+
+            var oldPC2 = state.PC;
+            test.ExecuteCycle();
+
+            Assert.AreEqual(oldPC + 2, state.PC);
         }
 
         //ExA1 - SKNP Vx
@@ -627,12 +652,25 @@ namespace chip_8
         //Set I = location of sprite for digit Vx.
         //
         //The value of I is set to the location for the hexadecimal sprite 
-        //corresponding to the value of Vx.See section 2.4, Display, for more information
+        //corresponding to the value of Vx. See section 2.4, Display, for more information
         //on the Chip-8 hexadecimal font.
         [Test]
         public void TestFx29()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.V[8] = 0xA;
+
+            test.Load(new byte[] { 0xF8, 0x29 });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(0xA * 5, state.I);
+            //Is the letter 0XA
+            Assert.AreEqual(0xF0, state.memory[state.I]);
+            Assert.AreEqual(0x90, state.memory[state.I+1]);
+            Assert.AreEqual(0xF0, state.memory[state.I+2]);
+            Assert.AreEqual(0x90, state.memory[state.I+3]);
+            Assert.AreEqual(0x90, state.memory[state.I+4]);
         }
 
         //Fx33 - LD B, Vx

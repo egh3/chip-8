@@ -184,7 +184,7 @@ namespace chip_8
                         var sprite = (ulong)(_s.memory[_s.I + i]) << (64 - 8);
                         var newLine = Utils.RoR(sprite, _s.V[instruction.x]);
                         _screen[(_s.V[instruction.y] + i) % 32] ^= newLine;
-                        if(Utils.CheckIfAnyBitCleared(orignalLine, _screen[(_s.V[instruction.y] + 1) % 32]))
+                        if(Utils.CheckIfAnyBitCleared(orignalLine, _screen[(_s.V[instruction.y] + i) % 32]))
                             _s.V[0xF] = 1;
                     }
                     break;

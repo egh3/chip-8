@@ -1,10 +1,1 @@
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\bin\Debug\chip-8.exe.config
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\bin\Debug\chip-8.exe
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\bin\Debug\chip-8.pdb
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\bin\Debug\nunit.framework.dll
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\bin\Debug\nunit.framework.xml
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\obj\Debug\chip_8.Properties.Resources.resources
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\obj\Debug\chip-8.csproj.GenerateResource.Cache
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\obj\Debug\chip-8.exe
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\obj\Debug\chip-8.pdb
-C:\Users\ghamilton\Desktop\chip-8\chip-8\chip-8\obj\Debug\chip-8.csprojResolveAssemblyReference.cache
+C:\Users\Gene\Desktop\chip8\chip-8\chip-8\bin\Debug\chip-8.exe.config

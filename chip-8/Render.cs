@@ -14,6 +14,7 @@ namespace chip_8
         public Render(ulong[] screen, Form formToRenderOn)
         {
             var g = formToRenderOn.CreateGraphics();
+            //Draw black box around the boundry
             g.DrawRectangle(Pens.Black, 0, 0, _pixelSize.Width * 64, _pixelSize.Height * 32);
 
             int rowi = 0;

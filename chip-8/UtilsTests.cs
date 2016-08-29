@@ -16,7 +16,7 @@ namespace chip_8
             ulong line = 0xAAAAAAAAAAAAAAAA;
             ulong sprite = 0x0000000000000000;
 
-            Assert.IsFalse(Utils.checkForClear(line, line ^ sprite));
+            Assert.IsFalse(Utils.CheckIfAnyBitCleared(line, line ^ sprite));
         }
 
         [Test]
@@ -25,7 +25,7 @@ namespace chip_8
             ulong line = 0xAAAAAAAAAAAAAAAA;
             ulong sprite = 0x5555555555555555;
 
-            Assert.IsFalse(Utils.checkForClear(line, line ^ sprite));
+            Assert.IsFalse(Utils.CheckIfAnyBitCleared(line, line ^ sprite));
         }
 
         [Test]
@@ -34,7 +34,22 @@ namespace chip_8
             ulong line = 0xAAAAAAAAAAAAAAAA;
             ulong sprite = 0xAA55555555555555;
 
-            Assert.IsTrue(Utils.checkForClear(line, line ^ sprite));
+            Assert.IsTrue(Utils.CheckIfAnyBitCleared(line, line ^ sprite));
+        }
+
+        [Test]
+        public void TestClearWithOrignalclearSpriteClear()
+        {
+            ulong line = 0x0;
+            ulong sprite = 0x0;
+
+            Assert.IsFalse(Utils.CheckIfAnyBitCleared(line, line ^ sprite));
+        }
+
+        [Test]
+        public void TestRoRwithShift()
+        {
+
         }
     }
 }

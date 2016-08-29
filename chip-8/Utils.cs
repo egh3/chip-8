@@ -17,7 +17,12 @@ namespace chip_8
             return ror;
         }
 
-        public static bool checkForClear(ulong orignalLine, ulong newLine)
+        public static ulong RoR_New(ulong value, int shift)
+        {
+            return (value >> shift) | (value << (sizeof(long) * 8 - shift));
+        }
+
+        public static bool CheckIfAnyBitCleared(ulong orignalLine, ulong newLine)
         {
             return (orignalLine & ~newLine) != 0;
         }

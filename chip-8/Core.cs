@@ -89,15 +89,12 @@ namespace chip_8
                     break;
                 case 0x6:
                     {
-                        var param = instruction.kk;
-                        _s.V[instruction.x] = param;
+                        _s.V[instruction.x] = instruction.kk;
                     }
                     break;
                 case 0x7:
                     {
-                        byte xIndex = instruction.x;
-                        var param = instruction.kk;
-                        _s.V[xIndex] += param;
+                        _s.V[instruction.x] += instruction.kk;
                     }
                     break;
                 case 0x8:
@@ -181,16 +178,14 @@ namespace chip_8
                     break;
                 case 0xD:
                     _s.V[0xF] = 0;
-                    for(var i = 0; i<instruction.kk; i++)
+                    for(var i = 0; i<instruction.op; i++)
                     {
-                        ulong orignalLine = _screen[_s.V[instruction.y] + i];
+                        ulong orignalLine = _screen[(_s.V[instruction.y] + i) % 32];
                         var sprite = (ulong)(_s.memory[_s.I + i]) << (64 - 8);
                         var newLine = Utils.RoR(sprite, _s.V[instruction.x]);
-                        _screen[_s.V[instruction.y] + i] ^= newLine;
-                        if(Utils.checkForClear(orignalLine, _screen[_s.V[instruction.y] + 1]))
-                        {
+                        _screen[(_s.V[instruction.y] + i) % 32] ^= newLine;
+                        if(Utils.CheckIfAnyBitCleared(orignalLine, _screen[(_s.V[instruction.y] + 1) % 32]))
                             _s.V[0xF] = 1;
-                        }
                     }
                     break;
                 case 0xE:
@@ -236,6 +231,9 @@ namespace chip_8
                                 break;
                             case 0x65:
                                 Array.Copy(_s.memory, _s.I, _s.V, 0, _s.V[instruction.x]);
+                                break;
+                            case 0xFF:
+                                throw new Exception("Invalid Opcode");
                                 break;
                         }
                     }

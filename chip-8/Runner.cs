@@ -37,20 +37,17 @@ namespace chip_8
                     0xFF, 0xFF
                 });
 
-            int i = 0;
-
             try
             {
                 while (_running)
                 {
                     _core.ExecuteCycle();
-                    i++;
-                    System.Threading.Thread.Sleep(50);
+                    //System.Threading.Thread.Sleep(5);
                 }
             }
             catch
             {
-
+                _running = false;
             }
         }
 

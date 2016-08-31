@@ -10,14 +10,15 @@ namespace chip_8
     {
         public Keys[] pressed = new Keys[] { Keys.Key_4 | Keys.Key_0, Keys.Key_0 };
         public int index = 0;
+
         public Keys ReadKey()
         {
-            return pressed[index++];
+            return pressed[index++%pressed.Length];
         }
 
         public Keys WaitForKey()
         {
-            return pressed[index++];
+            return pressed[index++%pressed.Length];
         }
     }
 }

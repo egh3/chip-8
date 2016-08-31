@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace chip_8
 {
     [Flags]
-    enum Keys
+    enum Keys : byte
     {
         None,
         Key_0 = 0x00, Key_1 = 0x01, Key_2 = 0x02, Key_3 = 0x03, Key_4 = 0x04, Key_5 = 0x05, Key_6 = 0x06, Key_7 = 0x7,

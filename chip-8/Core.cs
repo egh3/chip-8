@@ -206,6 +206,13 @@ namespace chip_8
                             case 0x07:
                                 _s.V[instruction.x] = _s.DT;
                                 break;
+                            case 0x0A:
+                                var key = keyboard.ReadKey();
+                                if (key == 0)
+                                    _s.PC -= 2;
+                                else
+                                    _s.V[instruction.x] = (byte)key;
+                                break;
                             case 0x15:
                                 _s.DT = _s.V[instruction.x];
                                 break;

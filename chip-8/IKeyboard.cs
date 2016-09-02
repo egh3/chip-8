@@ -8,7 +8,8 @@ namespace chip_8
 {
     interface IKeyboard
     {
-        Keys WaitForKey();
+        void KeyUp(Keys key);
+        void KeyDown(Keys key);
         Keys ReadKey(); 
     }
 }

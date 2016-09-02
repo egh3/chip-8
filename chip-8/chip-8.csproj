@@ -80,6 +80,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Chip8Keyboard.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="CoreInstructionTests.cs" />
     <Compile Include="Font.cs" />

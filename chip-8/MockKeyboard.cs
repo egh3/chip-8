@@ -16,9 +16,14 @@ namespace chip_8
             return pressed[index++%pressed.Length];
         }
 
-        public Keys WaitForKey()
+        public void KeyUp(Keys key)
         {
-            return pressed[index++%pressed.Length];
+            throw new NotImplementedException();
+        }
+
+        public void KeyDown(Keys key)
+        {
+            throw new NotImplementedException();
         }
     }
 }

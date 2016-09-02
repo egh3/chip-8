@@ -15,6 +15,7 @@ namespace chip_8
         {
             var g = formToRenderOn.CreateGraphics();
             //Draw black box around the boundry
+            g.Clear(Color.White);
             g.DrawRectangle(Pens.Black, 0, 0, _pixelSize.Width * 64, _pixelSize.Height * 32);
 
             int rowi = 0;

@@ -11,7 +11,7 @@ namespace chip_8
     {
         private State _s;
         private readonly Random _rng;
-        private readonly IKeyboard keyboard;
+        private readonly IKeyboard _keyboard;
         public ulong[] _screen = new ulong[32];
         private System.Threading.Timer _SixtyHzTimer;
 
@@ -20,7 +20,16 @@ namespace chip_8
             _s = state;
             _rng = new Random();
             LoadFonts(0x000);
-            keyboard = new MockKeyboard();
+            _keyboard = new MockKeyboard();
+            _SixtyHzTimer = new System.Threading.Timer(Tick60Hz, null, 0, 16);
+        }
+
+        public Core(State state, IKeyboard keyboard)
+        {
+            _s = state;
+            _rng = new Random();
+            LoadFonts(0x000);
+            _keyboard = keyboard;
             _SixtyHzTimer = new System.Threading.Timer(Tick60Hz, null, 0, 16);
         }
 
@@ -35,7 +44,7 @@ namespace chip_8
             _s = state;
             _rng = rng;
             LoadFonts(0x000);
-            keyboard = new MockKeyboard();
+            _keyboard = new MockKeyboard();
         }
 
         public void ExecuteCycle()
@@ -192,7 +201,7 @@ namespace chip_8
                     switch(instruction.kk)
                     {
                         case 0x9E:
-                            if(keyboard.ReadKey().HasFlag(Keys.Key_4))
+                            if(_keyboard.ReadKey().HasFlag(Keys.Key_4))
                             {
                                 _s.PC += 2;
                             }
@@ -207,7 +216,7 @@ namespace chip_8
                                 _s.V[instruction.x] = _s.DT;
                                 break;
                             case 0x0A:
-                                var key = keyboard.ReadKey();
+                                var key = _keyboard.ReadKey();
                                 if (key == 0)
                                     _s.PC -= 2;
                                 else

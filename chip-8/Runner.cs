@@ -10,11 +10,12 @@ namespace chip_8
     {
         private bool _running = false;
         public Core _core;
-        private State _state;
+        private Form1 _form1;
 
-        public Runner()
+        public Runner(Form1 form, IKeyboard keyboard)
         {
-            _core = new Core(new State());
+            _core = new Core(new State(), keyboard);
+            _form1 = form;
         }
 
         public void Run()
@@ -34,6 +35,8 @@ namespace chip_8
                     0x70, 0x05,
                     0x33, 0x00,
                     0x12, 0x0C,
+                    0xF9, 0x0A,
+                    0x00, 0xE0,
                     0xFF, 0xFF
                 });
 
@@ -42,7 +45,8 @@ namespace chip_8
                 while (_running)
                 {
                     _core.ExecuteCycle();
-                    //System.Threading.Thread.Sleep(5);
+                    Render rend = new Render(_core._screen, _form1);
+                    System.Threading.Thread.Sleep(20);
                 }
             }
             catch

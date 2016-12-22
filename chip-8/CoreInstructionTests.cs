@@ -21,6 +21,7 @@ namespace chip_8
         [Test]
         public void TestCLS()
         {
+
             Assert.Fail();
         }
 
@@ -563,7 +564,22 @@ namespace chip_8
         [Test]
         public void TestExA1()
         {
-            Assert.Fail();
+            State state = new State();
+            Core test = new Core(state);
+            state.V[0] = 6;
+            var oldPC = state.PC;
+
+            test.Load(new byte[] { 0xE0, 0xA1 });
+            test.ExecuteCycle();
+
+            Assert.AreEqual(oldPC + 4, state.PC);
+
+            state.Reset();
+
+            var oldPC2 = state.PC;
+            test.ExecuteCycle();
+
+            Assert.AreEqual(oldPC + 2, state.PC);
         }
 
         //Fx07 - LD Vx, DT

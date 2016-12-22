@@ -18,6 +18,10 @@ namespace chip_8
         {
             InitializeComponent();
 
+            this.SetStyle(ControlStyles.DoubleBuffer, true);
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            this.SetStyle(ControlStyles.UserPaint, true);
+
             keyboard = new Chip8Keyboard();
             test = new Runner(this, keyboard);
 

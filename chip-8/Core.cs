@@ -14,6 +14,7 @@ namespace chip_8
         private readonly IKeyboard _keyboard;
         public ulong[] _screen = new ulong[32];
         private System.Threading.Timer _SixtyHzTimer;
+        private System.Threading.Timer _SixtyHzTimerSound;
 
         public Core(State state)
         {
@@ -33,18 +34,29 @@ namespace chip_8
             _SixtyHzTimer = new System.Threading.Timer(Tick60Hz, null, 0, 16);
         }
 
-        private void Tick60Hz(object state)
-        {
-            if(_s.DT > 0)
-                _s.DT--;
-        }
-
         public Core(State state, Random rng)
         {
             _s = state;
             _rng = rng;
             LoadFonts(0x000);
             _keyboard = new MockKeyboard();
+            _SixtyHzTimer = new System.Threading.Timer(Tick60Hz, null, 0, 16);
+        }
+
+        private void Tick60Hz(object state)
+        {
+            if(_s.DT > 0)
+                _s.DT--;
+        }
+
+        //00E0 - CLS
+        //Clear the display.
+        private void ClearScreen()
+        {
+            for (int i = 0; i < _screen.Length; i++)
+            {
+                _screen[i] = 0;
+            }
         }
 
         public void ExecuteCycle()
@@ -58,10 +70,7 @@ namespace chip_8
                 case 0x0:
                     if(instruction.kk == 0xE0) //CLS
                     {
-                        for(int i = 0; i < _screen.Length; i++)
-                        {
-                            _screen[i] = 0;
-                        }
+                        ClearScreen();
                     }
                     else if(instruction.kk == 0xEE) //RET
                     {
@@ -148,7 +157,7 @@ namespace chip_8
                                     _s.V[instruction.x] = (byte)(_s.V[instruction.x] - _s.V[instruction.y]);
                                 }
                                 break;
-                            case 0x6:
+                            case 0x6: //SHIFT BUG
                                 _s.V[0xF] = (byte)((_s.V[instruction.x] & 0x1) != 0 ? 1 : 0);
                                 _s.V[instruction.x] /= 2;
                                 break;
@@ -159,7 +168,7 @@ namespace chip_8
                                     _s.V[instruction.x] = (byte)(_s.V[instruction.y] - _s.V[instruction.x]);
                                 }
                                 break;
-                            case 0xE:
+                            case 0xE: //SHIFT BUG
                                 _s.V[0xF] = (byte)((_s.V[instruction.x] & 0x80) != 0 ? 1 : 0);
                                 _s.V[instruction.x] *= 2;
                                 break;
@@ -186,6 +195,7 @@ namespace chip_8
                     _s.V[instruction.x] = (byte)(ba[0] & instruction.kk);
                     break;
                 case 0xD:
+                    //Draw screen
                     _s.V[0xF] = 0;
                     for(var i = 0; i<instruction.op; i++)
                     {
@@ -201,10 +211,14 @@ namespace chip_8
                     switch(instruction.kk)
                     {
                         case 0x9E:
-                            if(_keyboard.ReadKey().HasFlag(Keys.Key_4))
+                            if(_keyboard.ReadKey() != 0)
                             {
                                 _s.PC += 2;
                             }
+                            break;
+                        case 0xA1:
+                            if ((_keyboard.ReadKey() & (Keys)_s.V[instruction.x]) != 0)
+                                _s.PC += 2;
                             break;
                     }
                     break;
@@ -244,9 +258,11 @@ namespace chip_8
                                 break;
                             case 0x55:
                                 Array.Copy(_s.V, 0, _s.memory, _s.I, _s.V[instruction.x]);
+                                _s.I += _s.V[instruction.x];
                                 break;
                             case 0x65:
                                 Array.Copy(_s.memory, _s.I, _s.V, 0, _s.V[instruction.x]);
+                                _s.I += _s.V[instruction.x];
                                 break;
                             case 0xFF:
                                 throw new Exception("Invalid Opcode");
